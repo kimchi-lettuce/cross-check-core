@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import TheWelcome from '../components/TheWelcome.vue'
+import RequestBoard from '@/components/homeView/RequestBoard/index.vue'
 </script>
 
 <template>
-  <main>
-    <TheWelcome />
-  </main>
+	<RequestBoard />
+	<div class="grid gap-4 mt-5"></div>
 </template>

@@ -2,8 +2,6 @@
 import GoogleIcon from '@/components/icons/GoogleIcon.vue'
 import { AutoForm } from '@/components/ui/auto-form'
 import { Button } from '@/components/ui/button'
-import { auth } from '@/lib/firebaseConfig'
-import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth'
 import { Loader2 } from 'lucide-vue-next'
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
