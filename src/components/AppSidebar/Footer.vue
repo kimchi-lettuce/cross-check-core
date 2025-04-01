@@ -2,12 +2,10 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { SidebarFooter, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
-import { auth } from '@/lib/firebaseConfig'
-import { ChevronsUpDown, LogOut, ChevronRight, Headset } from 'lucide-vue-next'
+import { ChevronsUpDown, LogOut, Headset } from 'lucide-vue-next'
 import { ref } from 'vue'
-import { useAuthStore } from '@/stores/authStore'
+import AppMenuLink from './AppMenuLink.vue'
 
-const authStore = useAuthStore()
 const data = ref({
 	user: {
 		avatar: 'https://github.com/shadcn.png'
@@ -17,18 +15,11 @@ const data = ref({
 <template>
 	<SidebarFooter>
 		<SidebarMenu>
-			<SidebarMenuItem>
-				<RouterLink to="/support">
-					<SidebarMenuButton size="lg" class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground justify-between flex flex-row">
-						<div class="size-8 min-w-8 flex items-center justify-center rounded-lg">
-							<Headset class="size-4" />
-						</div>
-						<span class="truncate">Support & Feedback</span>
-						<div class="flex-1" />
-						<ChevronRight class="size-4" />
-					</SidebarMenuButton>
-				</RouterLink>
-			</SidebarMenuItem>
+			<AppMenuLink text="Contact Us" path="/support">
+				<template #icon>
+					<Headset class="size-4" />
+				</template>
+			</AppMenuLink>
 
 			<SidebarMenuItem>
 				<DropdownMenu>
@@ -39,14 +30,14 @@ const data = ref({
 								<AvatarFallback class="rounded-lg">CN</AvatarFallback>
 							</Avatar>
 							<div class="grid flex-1 text-left text-sm leading-tight">
-								<span class="truncate font-semibold">{{ authStore.user?.displayName }}</span>
-								<span class="truncate text-xs">{{ authStore.user?.email }}</span>
+								<span class="truncate font-semibold">{{ 'TODO:' }}</span>
+								<span class="truncate text-xs">{{ 'TODO:' }}</span>
 							</div>
 							<ChevronsUpDown class="ml-auto size-4" />
 						</SidebarMenuButton>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent class="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg" side="bottom" align="end" :side-offset="4">
-						<DropdownMenuItem @click="auth.signOut()">
+						<DropdownMenuItem @click="console.warn('TODO: Log out')">
 							<LogOut />
 							Log out
 						</DropdownMenuItem>

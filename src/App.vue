@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout/index.vue'
-// import { useAuthStore } from '@/stores/authStore'
+import { useAuth } from '@clerk/vue'
 
-// const authStore = useAuthStore()
+const { isSignedIn } = useAuth()
 </script>
 
 <template>
-	<!-- <AuthenticatedLayout v-if="authStore.isAuthenticated">
+	<!-- Show authenticated layout when signed in -->
+	<AuthenticatedLayout v-if="isSignedIn">
 		<RouterView />
-	</AuthenticatedLayout> -->
-	<RouterView />
+	</AuthenticatedLayout>
+
+	<!-- Show default layout when not signed in -->
+	<template v-else>
+		<RouterView />
+	</template>
 </template>

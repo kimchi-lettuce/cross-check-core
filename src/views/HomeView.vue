@@ -4,5 +4,5 @@ import RequestBoard from '@/components/homeView/RequestBoard/index.vue'
 
 <template>
 	<RequestBoard />
-	<div class="grid gap-4 mt-5"></div>
+	<div class="grid gap-4 mt-5">AHHHHH</div>
 </template>

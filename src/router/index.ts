@@ -1,3 +1,4 @@
+import { useAuth } from '@clerk/vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
@@ -7,6 +8,12 @@ const router = createRouter({
 			path: '/',
 			name: 'home',
 			component: () => import('../views/HomeView.vue'),
+			meta: { requiresAuth: true }
+		},
+		{
+			path: '/memory-verse',
+			name: 'memory-verse',
+			component: () => import('../views/MemoryVerseView.vue'),
 			meta: { requiresAuth: true }
 		},
 		{
@@ -34,28 +41,22 @@ const router = createRouter({
 })
 
 // Navigation guard using auth store
-router.beforeEach((to, from, next) => {
-	// const authStore = useAuthStore()
+router.beforeEach(to => {
+	console.log(`%c🚀 Running navigation guard for navigation to: ${String(to.fullPath)}`, 'color: #3b82f6; font-weight: bold;')
 
-	console.log(`%c🚀 Navigating to: ${String(to.name)}`, 'color: #3b82f6; font-weight: bold;')
+	const { isSignedIn, isLoaded } = useAuth()
+	// Get the original destination path
+	const redirectPath = to.query.redirect?.toString() || to.path
 
-	// If the first snapshot of the user data is still loading, then show the
-	// initial loading page
-	// if (authStore.isLoading) {
-	// 	if (to.name !== 'loading') {
-	// 		// If found to be navigating to anything that isn't the loading
-	// 		// page, force it to navigate to the loading page anyway
-	// 		next({ name: 'loading' })
-	// 		// If the user was attempting to navigate to the auth page, redirect
-	// 		// them to the home page instead
-	// 		authStore.onSignInRedirect = to.fullPath === '/auth' ? '/' : to.fullPath
-	// 		return
-	// 	}
-	// }
+	if (!isLoaded.value && to.name !== 'loading') {
+		return { name: 'loading', query: { redirect: redirectPath } }
+	}
 
-	// Route authentication protection is handled in `authStore.ts` based on the
-	// `onAuthStateChanged` callback
-	next()
+	if (to.meta.requiresAuth && !isSignedIn.value) {
+		return { name: 'auth', query: { redirect: redirectPath } }
+	}
+
+	// Implicitly continue navigation by not returning anything
 })
 
 export default router

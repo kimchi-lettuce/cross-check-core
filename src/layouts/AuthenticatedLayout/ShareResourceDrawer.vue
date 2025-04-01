@@ -3,16 +3,12 @@ import { AutoForm } from '@/components/ui/auto-form'
 import { DependencyType } from '@/components/ui/auto-form/interface'
 import { Button } from '@/components/ui/button'
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer'
-import { useAuthStore } from '@/stores/authStore'
-import { db } from '@repo/utils'
-import { RESOURCE_TYPES } from '@repo/utils/src/schema'
 import { Loader2, Plus, X } from 'lucide-vue-next'
-import type { Typesaurus } from 'typesaurus'
 import { ref } from 'vue'
 import { z } from 'zod'
 
 const resourceSchema = z.object({
-	type: z.enum(Object.keys(RESOURCE_TYPES) as [string, ...string[]], {
+	type: z.enum(Object.keys([]) as [string, ...string[]], {
 		required_error: 'Please select a resource type',
 		description: 'What kind of resource are you sharing?'
 	}),
@@ -24,16 +20,11 @@ const resourceSchema = z.object({
 	description: z.string().optional()
 })
 
-const URL_REQUIRED_TYPES = Object.entries(RESOURCE_TYPES)
-	.filter(([_, config]) => config?.requiresUrl)
-	.map(([type]) => type)
+const URL_REQUIRED_TYPES = [] as string[]
 
-const AUTHOR_REQUIRED_TYPES = Object.entries(RESOURCE_TYPES)
-	.filter(([_, config]) => config?.requiresAuthor)
-	.map(([type]) => type)
+const AUTHOR_REQUIRED_TYPES = [] as string[]
 
 const isLoading = ref(false)
-const authStore = useAuthStore()
 
 const onSubmit = async (data: z.infer<typeof resourceSchema>) => {
 	try {

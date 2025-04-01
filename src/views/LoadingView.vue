@@ -1,12 +1,30 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
+import { useAuth } from '@clerk/vue'
+import { useRoute, useRouter } from 'vue-router'
+
+const route = useRoute()
+const router = useRouter()
+const { isLoaded } = useAuth()
 
 // Only show the loading spinner if the loading state is needed to be shown for
 // longer than 500ms
 const showLoadingSpinner = ref(false)
-onMounted(() => setTimeout(() => (showLoadingSpinner.value = true), 500))
+onMounted(() => {
+	setTimeout(() => (showLoadingSpinner.value = true), 500)
+})
 
-// TODO: Add a creating user profile loading state
+// Watch for Clerk to load, then redirect
+watch(
+	isLoaded,
+	loaded => {
+		if (loaded) {
+			const redirectUrl = route.query.redirect as string
+			router.push(redirectUrl || '/')
+		}
+	},
+	{ immediate: true }
+)
 </script>
 
 <template>
