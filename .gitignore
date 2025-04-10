@@ -33,4 +33,4 @@ coverage
 .env
 
 # Convex generated files
-convex/_generated
+/convex/_generated/*
