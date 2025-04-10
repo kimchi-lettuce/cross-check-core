@@ -2,11 +2,15 @@
 import { RouterView } from 'vue-router'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout/index.vue'
 import { useAuth } from '@clerk/vue'
+import Toaster from '@/components/ui/toast/Toaster.vue'
 
 const { isSignedIn } = useAuth()
 </script>
 
 <template>
+	<!-- A global toast component -->
+	<Toaster />
+
 	<!-- Show authenticated layout when signed in -->
 	<AuthenticatedLayout v-if="isSignedIn">
 		<RouterView />

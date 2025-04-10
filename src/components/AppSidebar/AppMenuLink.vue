@@ -5,8 +5,8 @@ defineProps<{ text: string; path: string }>()
 
 <template>
 	<SidebarMenuItem>
-		<RouterLink :to="path">
-			<SidebarMenuButton size="md" class="gap-2">
+		<RouterLink :to="path" v-slot="{ isActive }">
+			<SidebarMenuButton size="md" class="gap-2" :class="{ 'bg-sidebar-accent': isActive }">
 				<div class="size-8 min-w-8 flex items-center justify-center rounded-lg">
 					<slot name="icon" />
 				</div>

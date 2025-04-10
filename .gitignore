@@ -31,3 +31,6 @@ coverage
 
 # Environment variables
 .env
+
+# Convex generated files
+convex/_generated

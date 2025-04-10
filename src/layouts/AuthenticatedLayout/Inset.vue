@@ -8,7 +8,7 @@ const { state } = useSidebar()
 <template>
 	<SidebarInset>
 		<div
-			class="flex flex-col overflow-hidden transition-[width] duration-200 ease-linear"
+			class="flex flex-col h-screen overflow-hidden transition-[width] duration-200 ease-linear"
 			:style="{
 				width: state === 'collapsed' ? 'calc(100vw - var(--sidebar-width-icon))' : 'calc(100vw - var(--sidebar-width))'
 			}"
