@@ -15,9 +15,7 @@ export default defineSchema({
 		translation: v.string(),
 		/** User-entered text of the verse. Users manually type or paste the
 		 * verse text themselves, not from any API */
-		text: v.string(),
-		/** Timestamp when the entry was created */
-		_creationTime: v.number()
+		text: v.string()
 	})
 		.index('by_userId', ['userId'])
 		.index('by_title', ['title']),
@@ -30,8 +28,7 @@ export default defineSchema({
 		status: v.union(v.literal('pending'), v.literal('evaluated'), v.literal('failed')),
 		score: v.optional(v.number()),
 		feedback: v.optional(v.string()),
-		error: v.optional(v.string()),
-		_creationTime: v.number()
+		error: v.optional(v.string())
 	})
 		.index('by_userId', ['userId'])
 		.index('by_verseReference', ['verseReference']),
