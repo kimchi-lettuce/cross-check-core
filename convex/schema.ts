@@ -2,16 +2,25 @@ import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
 
 export default defineSchema({
-	bibleVerses: defineTable({
-		reference: v.string(),
-		status: v.union(v.literal('pending'), v.literal('retrieved'), v.literal('failed')),
-		text: v.optional(v.string()),
-		error: v.optional(v.string()),
-		translation: v.literal('ESV'), // In case you want to add more translations later
+	/** Stores Bible verses that users have saved for memorization. Users
+	 * manually enter all verse information themselves */
+	userBibleEntries: defineTable({
+		/** Unique identifier of the user who saved this verse */
+		userId: v.string(),
+		/** User-defined reference to the Bible verse (e.g., "John 3:16-20",
+		 * "Psalm 23:1-6") */
+		title: v.string(),
+		/** User-defined Bible translation used (e.g., "ESV", "NIV", "KJV",
+		 * "NASB") */
+		translation: v.string(),
+		/** User-entered text of the verse. Users manually type or paste the
+		 * verse text themselves, not from any API */
+		text: v.string(),
+		/** Timestamp when the entry was created */
 		_creationTime: v.number()
 	})
-		.index('by_reference', ['reference', 'translation']) // To check if we already have this verse with specific translation
-		.index('by_status', ['status']), // Might be useful for cleanup/monitoring
+		.index('by_userId', ['userId'])
+		.index('by_title', ['title']),
 
 	// Track individual verse attempts
 	verseAttempts: defineTable({
