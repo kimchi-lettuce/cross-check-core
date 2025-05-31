@@ -9,14 +9,14 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import { watch } from 'vue'
 import { api } from '../../../convex/_generated/api'
-import { verseEntrySchema } from '../../../convex/memoryVerse/attempt'
+import { verseEntrySchema } from '../../../convex/memoryVerse/entry'
 import { useToast } from '../ui/toast'
 
 const dialogVisibility = defineModel<boolean>('open', { required: false })
 const { userId } = useAuth()
 const { toast } = useToast()
 
-const { mutate: addVerseEntry, error: addVerseEntryError } = useConvexMutation(api.memoryVerse.attempt.addVerseEntry)
+const { mutate: addVerseEntry, error: addVerseEntryError } = useConvexMutation(api.memoryVerse.entry.addVerseEntry)
 watch(addVerseEntryError, error => {
 	toast({
 		title: 'Uh oh! Something went wrong.',
