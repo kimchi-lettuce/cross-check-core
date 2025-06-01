@@ -75,6 +75,12 @@ function resetAttempt() {
 	revealVerse.value = true
 }
 
+/** Watch the `verse` prop and reset the attempt if it changes */
+watch(
+	() => props.verse?._id,
+	() => resetAttempt()
+)
+
 /** Submit the user's attempt to be evaluated */
 async function submitUserAttempt() {
 	if (!userId.value) throw new Error('User not authenticated')

@@ -9,7 +9,7 @@ import { BookOpen, Trash2 } from 'lucide-vue-next'
 import type { Doc } from 'convex/_generated/dataModel'
 
 const props = defineProps<{ selectedVerse?: Doc<'userBibleEntries'> | null }>()
-const emit = defineEmits<{ (e: 'select', verse: Doc<'userBibleEntries'>): void }>()
+const emit = defineEmits<{ (e: 'select', verse: Doc<'userBibleEntries'> | null): void }>()
 
 const { userId } = useAuth()
 const { data: savedVerses, isLoading } = useConvexQuery(api.memoryVerse.entry.getSavedVerses, {
@@ -18,17 +18,14 @@ const { data: savedVerses, isLoading } = useConvexQuery(api.memoryVerse.entry.ge
 
 const { mutate: deleteVerseMutation, isLoading: isDeleting, error: deleteError } = useConvexMutation(api.memoryVerse.entry.deleteVerseEntry)
 
-const selectVerse = (verse: Doc<'userBibleEntries'>) => emit('select', verse)
-
-function isSelected(verse: Doc<'userBibleEntries'>) {
-	return props.selectedVerse?._id === verse._id
-}
+const isSelected = (verse: Doc<'userBibleEntries'>) => props.selectedVerse?._id === verse._id
 
 const deleteVerse = async (verse: Doc<'userBibleEntries'>, event: Event) => {
 	// Prevent selecting the verse when clicking delete
 	event.stopPropagation()
 	if (!userId.value) return
 	await deleteVerseMutation({ userId: userId.value, entryId: verse._id })
+	emit('select', null)
 }
 </script>
 
@@ -57,7 +54,7 @@ const deleteVerse = async (verse: Doc<'userBibleEntries'>, event: Event) => {
 				:key="verse._id"
 				:variant="isSelected(verse) ? 'selected' : 'ghost'"
 				class="w-full flex flex-row justify-between py-2"
-				@click="selectVerse(verse)"
+				@click="emit('select', verse)"
 			>
 				<div class="flex flex-row items-center gap-2">
 					<BookOpen class="w-4 h-4 mr-2 flex-shrink-0" />
