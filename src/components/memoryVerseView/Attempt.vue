@@ -1,51 +1,45 @@
 <script setup lang="ts">
 import { api } from '@/../convex/_generated/api'
+import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { ToastAction, useToast } from '@/components/ui/toast'
+import { useToast } from '@/components/ui/toast'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@clerk/vue'
 import { useConvexMutation, useConvexQuery } from '@convex-vue/core'
-import type { Id } from 'convex/_generated/dataModel'
-import { CircleCheckBig, EyeClosedIcon, EyeIcon, LoaderCircle, ChevronUp } from 'lucide-vue-next'
-import { computed, h, ref, watch } from 'vue'
+import type { Doc, Id } from 'convex/_generated/dataModel'
+import { CircleCheckBig, EyeClosedIcon, EyeIcon, LoaderCircle } from 'lucide-vue-next'
+import { computed, ref, watch } from 'vue'
 import VueMarkdown from 'vue-markdown-render'
-import { Button } from '@/components/ui/button'
-import type { VerseSelection } from '../BibleVerseSelector.vue'
 
-const { verse } = defineProps<{
-	verse: VerseSelection
-}>()
+const { userId } = useAuth()
+const { toast } = useToast()
 
+defineProps<{ verse: Doc<'userBibleEntries'> | null }>()
+defineEmits(['choose-new-verse'])
+
+/** The id of the attempt that the user is currently working on */
 const attemptId = ref<Id<'verseAttempts'> | undefined>()
 
-const {} = useConvexMutation()
-
-// This works by using a mutation that creates a `verseAttempt` entry, which we
-// watch using a query.
 const { mutate: createAttempt, error: createAttemptError } = useConvexMutation(api.memoryVerse.attempt.createAttempt)
-// Use the query at component level, will update when attemptId changes
 const { data: attemptData, isLoading: isAttemptLoading } = useConvexQuery(
 	api.memoryVerse.attempt.listenToAttempt,
+	// Reacts to when `attemptId` changes
 	computed(() => ({ attemptId: attemptId.value }))
 )
 /** Whether or not we are still evaluating the user's attempt */
 const isEvaluating = computed(() => {
 	return attemptId.value && (isAttemptLoading.value || attemptData.value?.status === 'pending')
 })
-const feedbackResponse = computed(() => attemptData.value?.feedback)
-const feedbackScore = computed(() => attemptData.value?.score)
-const feedbackHasLoaded = computed(() => attemptData.value?.status === 'evaluated')
+// const feedbackResponse = computed(() => attemptData.value?.feedback)
+// const feedbackScore = computed(() => attemptData.value?.score)
+// const feedbackHasLoaded = computed(() => attemptData.value?.status === 'evaluated')
 const scoreColorClass = computed(() => {
-	const score = feedbackScore.value
+	const score = attemptData.value?.score
 	if (!score) return
 	if (score >= 80) return 'bg-emerald-500' // Great score
 	if (score >= 60) return 'bg-amber-500' // Decent score
 	return 'bg-rose-500' // Needs improvement
 })
-
-const { userId } = useAuth()
-const { toast } = useToast()
-defineEmits(['choose-new-verse'])
 
 /** Whether or not to show the verse text */
 const revealVerse = ref(true)
@@ -67,18 +61,6 @@ watch(userInput, (newVal, oldVal) => {
 		toast({
 			title: 'Ready for Another Try?',
 			description: 'Use the "Next Attempt" button to start fresh with this verse',
-			action: h(
-				ToastAction,
-				{
-					altText: 'Next Attempt',
-					as: 'button',
-					onClick: () => resetAttempt(),
-					class: 'bg-primary text-primary-foreground hover:bg-primary/90'
-				},
-				{
-					default: () => 'Next Attempt'
-				}
-			),
 			duration: 5000
 		})
 	}
@@ -114,19 +96,15 @@ async function submitUserAttempt() {
 
 <template>
 	<div class="max-w-3xl mx-auto">
-		<div class="bg-card rounded-lg p-6">
+		<div v-if="!verse" class="text-center text-muted-foreground">
+			<p>No verse selected</p>
+		</div>
+		<div v-else class="bg-card rounded-lg p-6">
 			<div class="mb-6">
-				<div class="flex justify-between">
-					<h2 class="text-xl font-semibold mb-2">Practice Mode</h2>
-					<Button variant="link" size="sm" @click="$emit('choose-new-verse')">
-						<ChevronUp class="h-4 w-4" />
-						Choose a new verse
-					</Button>
-				</div>
 				<div class="relative">
 					<div class="bg-muted p-4 rounded-md mb-4 blurred-verse" :class="{ revealed: revealVerse }">
-						<p class="text-lg font-medium">John 3:16</p>
-						<p class="italic">For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.</p>
+						<p class="text-lg font-medium">{{ verse.title }}</p>
+						<p class="italic">{{ verse.text }}</p>
 					</div>
 					<button
 						@click="revealVerse = !revealVerse"
@@ -153,15 +131,15 @@ async function submitUserAttempt() {
 				<div class="flex flex-row items-center">
 					<transition name="slide-fade">
 						<div v-if="attemptId" class="flex-1 flex gap-2 items-center">
-							<Progress :modelValue="feedbackScore" :indicatorClass="cn('transition-all duration-300 ease-out', scoreColorClass)" />
+							<Progress :modelValue="attemptData?.score" :indicatorClass="cn('transition-all duration-300 ease-out', scoreColorClass)" />
 							<LoaderCircle v-if="isEvaluating" class="h-4 w-4 animate-spin" />
 							<CircleCheckBig v-else class="h-4 w-4" />
 						</div>
 					</transition>
 					<div class="flex-1 flex justify-end">
-						<Button @click="feedbackHasLoaded ? resetAttempt() : submitUserAttempt()" :disabled="isEvaluating">
-							<span v-if="feedbackHasLoaded">Next Attempt</span>
-							<template v-else-if="attemptId">
+						<Button v-if="attemptData?.status === 'evaluated'" @click="resetAttempt()">Next Attempt</Button>
+						<Button v-else @click="submitUserAttempt()" :disabled="isEvaluating">
+							<template v-if="attemptId">
 								<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
 								<span>Evaluating...</span>
 							</template>
@@ -171,7 +149,7 @@ async function submitUserAttempt() {
 				</div>
 
 				<transition name="fade">
-					<VueMarkdown v-if="feedbackResponse" :source="feedbackResponse" />
+					<VueMarkdown v-if="attemptData?.feedback" :source="attemptData.feedback" />
 				</transition>
 			</div>
 		</div>

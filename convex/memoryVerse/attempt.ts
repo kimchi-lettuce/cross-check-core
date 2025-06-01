@@ -1,66 +1,46 @@
 import { v } from 'convex/values'
 import { mutation, query } from '../_generated/server'
 import { internal } from '../_generated/api'
+import { z } from 'zod'
+import { withAuth } from '../utils/auth'
 
-// Public mutation for client to submit a verse attempt
+// Schema for validating attempt creation arguments
+const createAttemptSchema = z.object({
+	userId: z.string(),
+	verseReference: z.string().regex(/^[A-Za-z0-9\s:.-]+$/, 'Invalid verse reference format'),
+	submittedText: z.string().min(1, 'Submitted text is too short').max(1000, 'Submitted text is too long')
+})
+
+/** Call to create a new attempt for a user's bible verse entry. This triggers
+ * an internal action that runs in the background to evaluate the attempt */
 export const createAttempt = mutation({
 	args: {
 		userId: v.string(),
-		verseReference: v.string(),
+		bibleEntryId: v.id('userBibleEntries'),
+		/** The user's attempt at the verse */
 		submittedText: v.string()
 	},
 	returns: v.id('verseAttempts'),
-	handler: async (ctx, args) => {
-		// TODO: Test this against a not signed in user
-		// TODO: Add a authentication wrapper for the handler?
-		const identity = await ctx.auth.getUserIdentity()
-		if (identity === null) throw new Error('Not authenticated')
+	handler: (ctx, args) => {
+		return withAuth({ ctx, args, validationSchema: createAttemptSchema }, async (ctx, args) => {
+			// Insert the attempt with pending status
+			const attemptId = await ctx.db.insert('verseAttempts', {
+				userId: args.userId,
+				bibleEntryId: args.bibleEntryId,
+				submittedText: args.submittedText,
+				status: 'pending'
+			})
 
-		if (!args.verseReference.match(/^[A-Za-z0-9\s:.-]+$/)) {
-			throw new Error('Invalid verse reference format')
-		}
-		if (args.submittedText.length > 1000) {
-			throw new Error('Submitted text is too long')
-		}
-		if (args.submittedText.length < 5) {
-			throw new Error('Submitted text is too short')
-		}
+			// Schedule the evaluation action
+			await ctx.scheduler.runAfter(0, internal.memoryVerse.evaluation.evaluateVerse, {
+				attemptId,
+				bibleEntryId: args.bibleEntryId,
+				submittedText: args.submittedText
+			})
 
-		// Insert the attempt with pending status
-		const attemptId = await ctx.db.insert('verseAttempts', {
-			userId: args.userId,
-			verseReference: args.verseReference,
-			submittedText: args.submittedText,
-			status: 'pending'
+			console.log('Memory verse attempt created with id', attemptId)
+			return attemptId
 		})
-
-		// Update or create entry in userVerses
-		// const existing = await ctx.db
-		// 	.query('userVerses')
-		// 	.withIndex('by_userId', q => q.eq('userId', args.userId).eq('verseReference', args.verseReference))
-		// 	.unique()
-
-		// if (existing) {
-		// 	await ctx.db.patch(existing._id, { lastAttemptTime: Date.now() })
-		// } else {
-		// 	await ctx.db.insert('userVerses', {
-		// 		userId: args.userId,
-		// 		verseReference: args.verseReference,
-		// 		isPublic: false, // Default to private
-		// 		lastAttemptTime: Date.now()
-		// 	})
-		// }
-
-		// Schedule the evaluation action
-		await ctx.scheduler.runAfter(0, internal.memoryVerse.evaluation.evaluateVerse, {
-			attemptId,
-			verseReference: args.verseReference,
-			submittedText: args.submittedText
-		})
-
-		console.log('Memory verse attempt created with id', attemptId)
-
-		return attemptId
 	}
 })
 

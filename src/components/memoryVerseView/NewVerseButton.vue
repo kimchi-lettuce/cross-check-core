@@ -49,7 +49,7 @@ const onSubmit = form.handleSubmit(async values => {
 		<DialogContent>
 			<DialogTitle>Add a New Bible Verse</DialogTitle>
 			<DialogDescription>Enter the verse details below.</DialogDescription>
-			<form @submit="onSubmit" class="space-y-4 mt-4">
+			<form @submit="onSubmit" class="space-y-4">
 				<div class="flex gap-4">
 					<FormField v-slot="{ componentField }" name="title">
 						<FormItem class="flex-1">

@@ -23,7 +23,8 @@ export default defineSchema({
 	// Track individual verse attempts
 	verseAttempts: defineTable({
 		userId: v.string(),
-		verseReference: v.string(),
+		/** Links the attempt to a user's specific Bible entry */
+		bibleEntryId: v.id('userBibleEntries'),
 		submittedText: v.string(),
 		status: v.union(v.literal('pending'), v.literal('evaluated'), v.literal('failed')),
 		score: v.optional(v.number()),
@@ -31,15 +32,5 @@ export default defineSchema({
 		error: v.optional(v.string())
 	})
 		.index('by_userId', ['userId'])
-		.index('by_verseReference', ['verseReference']),
-
-	// Track which verses users are working on
-	userVerses: defineTable({
-		userId: v.string(),
-		verseReference: v.string(),
-		isPublic: v.boolean(),
-		lastAttemptTime: v.number()
-	})
-		.index('by_userId', ['userId'])
-		.index('by_public_verses', ['isPublic', 'verseReference'])
+		.index('by_bibleEntryId', ['bibleEntryId'])
 })

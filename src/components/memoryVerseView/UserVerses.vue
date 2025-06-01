@@ -6,11 +6,21 @@ import { useConvexQuery } from '@convex-vue/core'
 import { api } from '../../../convex/_generated/api'
 import { useAuth } from '@clerk/vue'
 import { BookOpen } from 'lucide-vue-next'
+import type { Doc } from 'convex/_generated/dataModel'
+
+const props = defineProps<{ selectedVerse?: Doc<'userBibleEntries'> | null }>()
+const emit = defineEmits<{ (e: 'select', verse: Doc<'userBibleEntries'>): void }>()
 
 const { userId } = useAuth()
 const { data: savedVerses, isLoading } = useConvexQuery(api.memoryVerse.entry.getSavedVerses, {
 	userId: userId.value ?? undefined
 })
+
+const selectVerse = (verse: Doc<'userBibleEntries'>) => emit('select', verse)
+
+function isSelected(verse: Doc<'userBibleEntries'>) {
+	return props.selectedVerse?._id === verse._id
+}
 </script>
 
 <template>
@@ -32,7 +42,14 @@ const { data: savedVerses, isLoading } = useConvexQuery(api.memoryVerse.entry.ge
 			</div>
 
 			<!-- Verses list -->
-			<Button v-else v-for="verse in savedVerses" :key="verse._id" variant="ghost" class="w-full justify-start text-left h-auto py-2">
+			<Button
+				v-else
+				v-for="verse in savedVerses"
+				:key="verse._id"
+				:variant="isSelected(verse) ? 'selected' : 'ghost'"
+				class="w-full justify-start text-left h-auto py-2"
+				@click="selectVerse(verse)"
+			>
 				<BookOpen class="w-4 h-4 mr-2 flex-shrink-0" />
 				<span class="truncate">{{ verse.title }}</span>
 			</Button>

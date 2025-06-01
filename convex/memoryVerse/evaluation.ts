@@ -1,6 +1,6 @@
 import { v } from 'convex/values'
 import OpenAI from 'openai'
-import { internalAction, internalMutation } from '../_generated/server'
+import { internalAction, internalMutation, internalQuery } from '../_generated/server'
 import { internal } from '../_generated/api'
 
 const EVALUATE_VERSE_PROMPT = `You are a Bible verse evaluation assistant. Compare submitted texts with referenced Bible verses and provide a score from 0 to 100 and detailed feedback.
@@ -32,20 +32,31 @@ Your response must be in valid JSON format:
 Use markdown for emphasis."
 }`
 
+export const getBibleEntryById = internalQuery({
+	args: { bibleEntryId: v.id('userBibleEntries') },
+	handler: async (ctx, args) => {
+		const entry = await ctx.db.get(args.bibleEntryId)
+		if (!entry) throw new Error('Bible entry not found')
+		return entry
+	}
+})
+
 export const evaluateVerse = internalAction({
 	// Because it's an internal action, we can pass in the document data,
 	// knowing that it comes from a trusted source
 	args: {
 		attemptId: v.id('verseAttempts'),
-		verseReference: v.string(),
+		bibleEntryId: v.id('userBibleEntries'),
 		submittedText: v.string()
 	},
 	handler: async (ctx, args) => {
 		try {
 			const openaiApiKey = process.env.OPENAI_API_KEY
 			if (!openaiApiKey) throw new Error('OpenAI API key not configured')
-
 			const openai = new OpenAI({ apiKey: openaiApiKey })
+
+			const bibleEntry = await ctx.runQuery(internal.memoryVerse.evaluation.getBibleEntryById, { bibleEntryId: args.bibleEntryId })
+
 			// For your verse evaluation use case: If budget is very tight,
 			// gpt-3.5-turbo should work fine If you want more reliable scoring and
 			// better theological understanding, gpt-4-turbo-minimal might be worth
@@ -58,13 +69,15 @@ export const evaluateVerse = internalAction({
 						content: EVALUATE_VERSE_PROMPT
 					},
 					{
-						// TODO: What if the user does prompt injection lol
+						// Provide full context: reference, translation, official text, and submitted attempt
 						role: 'user',
 						content: `
-							Reference: ${args.verseReference}
-							Submitted: ${args.submittedText}
-	
-							Please evaluate this verse attempt according to the criteria.
+						Reference: ${bibleEntry.title}
+						Translation: ${bibleEntry.translation}
+						Official Text: ${bibleEntry.text}
+						Submitted: ${args.submittedText}
+
+						Please evaluate this verse attempt according to the criteria.
 						`
 					}
 				],
