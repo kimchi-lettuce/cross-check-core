@@ -2,10 +2,10 @@
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area/index'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useConvexQuery } from '@convex-vue/core'
+import { useConvexMutation, useConvexQuery } from '@convex-vue/core'
 import { api } from '../../../convex/_generated/api'
 import { useAuth } from '@clerk/vue'
-import { BookOpen } from 'lucide-vue-next'
+import { BookOpen, Trash2 } from 'lucide-vue-next'
 import type { Doc } from 'convex/_generated/dataModel'
 
 const props = defineProps<{ selectedVerse?: Doc<'userBibleEntries'> | null }>()
@@ -16,10 +16,19 @@ const { data: savedVerses, isLoading } = useConvexQuery(api.memoryVerse.entry.ge
 	userId: userId.value ?? undefined
 })
 
+const { mutate: deleteVerseMutation, isLoading: isDeleting, error: deleteError } = useConvexMutation(api.memoryVerse.entry.deleteVerseEntry)
+
 const selectVerse = (verse: Doc<'userBibleEntries'>) => emit('select', verse)
 
 function isSelected(verse: Doc<'userBibleEntries'>) {
 	return props.selectedVerse?._id === verse._id
+}
+
+const deleteVerse = async (verse: Doc<'userBibleEntries'>, event: Event) => {
+	// Prevent selecting the verse when clicking delete
+	event.stopPropagation()
+	if (!userId.value) return
+	await deleteVerseMutation({ userId: userId.value, entryId: verse._id })
 }
 </script>
 
@@ -47,11 +56,16 @@ function isSelected(verse: Doc<'userBibleEntries'>) {
 				v-for="verse in savedVerses"
 				:key="verse._id"
 				:variant="isSelected(verse) ? 'selected' : 'ghost'"
-				class="w-full justify-start text-left h-auto py-2"
+				class="w-full flex flex-row justify-between py-2"
 				@click="selectVerse(verse)"
 			>
-				<BookOpen class="w-4 h-4 mr-2 flex-shrink-0" />
-				<span class="truncate">{{ verse.title }}</span>
+				<div class="flex flex-row items-center gap-2">
+					<BookOpen class="w-4 h-4 mr-2 flex-shrink-0" />
+					<span class="truncate">{{ verse.title }}</span>
+				</div>
+				<Button variant="ghost" class="px-0 text-red-400 hover:text-red-700" @click="deleteVerse(verse, $event)">
+					<Trash2 class="w-4 h-4" />
+				</Button>
 			</Button>
 		</div>
 	</ScrollArea>

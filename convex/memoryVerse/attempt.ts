@@ -3,12 +3,11 @@ import { mutation, query } from '../_generated/server'
 import { internal } from '../_generated/api'
 import { z } from 'zod'
 import { withAuth } from '../utils/auth'
+import { MAX_ENTRY_LENGTH } from './entry'
 
 // Schema for validating attempt creation arguments
-const createAttemptSchema = z.object({
-	userId: z.string(),
-	verseReference: z.string().regex(/^[A-Za-z0-9\s:.-]+$/, 'Invalid verse reference format'),
-	submittedText: z.string().min(1, 'Submitted text is too short').max(1000, 'Submitted text is too long')
+export const createAttemptSchema = z.object({
+	submittedText: z.string().min(1, 'Submitted text is too short').max(MAX_ENTRY_LENGTH, `Submitted text is too long (max ${MAX_ENTRY_LENGTH} characters)`)
 })
 
 /** Call to create a new attempt for a user's bible verse entry. This triggers

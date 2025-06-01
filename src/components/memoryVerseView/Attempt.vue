@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import { useAuth } from '@clerk/vue'
 import { useConvexMutation, useConvexQuery } from '@convex-vue/core'
 import type { Doc, Id } from 'convex/_generated/dataModel'
+import { createAttemptSchema } from '@/../convex/memoryVerse/attempt'
 import { CircleCheckBig, EyeClosedIcon, EyeIcon, LoaderCircle } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 import VueMarkdown from 'vue-markdown-render'
@@ -14,7 +15,7 @@ import VueMarkdown from 'vue-markdown-render'
 const { userId } = useAuth()
 const { toast } = useToast()
 
-defineProps<{ verse: Doc<'userBibleEntries'> | null }>()
+const props = defineProps<{ verse: Doc<'userBibleEntries'> | null }>()
 defineEmits(['choose-new-verse'])
 
 /** The id of the attempt that the user is currently working on */
@@ -77,14 +78,15 @@ function resetAttempt() {
 /** Submit the user's attempt to be evaluated */
 async function submitUserAttempt() {
 	if (!userId.value) throw new Error('User not authenticated')
-	if (userInput.value.length === 0) throw new Error('User input is required')
+	if (!props.verse?._id) throw new Error('Verse not selected')
+
+	const result = createAttemptSchema.safeParse({ submittedText: userInput.value })
+	if (!result.success) throw new Error(result.error.message)
 
 	submittedUserInput.value = userInput.value
 	const resp = await createAttempt({
 		userId: userId.value,
-		// FIXME: Remove the hardcoded verse reference
-		verseReference: 'John 3:16',
-		// TODO: Add bible translation version
+		bibleEntryId: props.verse?._id,
 		submittedText: userInput.value
 	})
 	if (!resp) throw new Error(`No attempt id returned ${createAttemptError.value}`)
