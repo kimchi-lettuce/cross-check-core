@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { RouterView } from 'vue-router'
-import { useUser } from '@clerk/vue'
+import { useUser, SignIn, SignUp } from '@clerk/vue'
 import { Loader2 } from 'lucide-vue-next'
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import ConvexProvider from './components/ConvexProvider.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout/index.vue'
-import SignInPage from './components/SignInPage.vue'
-import SignUpPage from './components/SignUpPage.vue'
 
 const { user, isLoaded } = useUser()
 const currentAuthPage = ref<'sign-in' | 'sign-up'>('sign-in')
@@ -47,9 +45,9 @@ watch(user, newUser => {
 		</div>
 	</div>
 
-	<div v-else-if="!user">
-		<SignInPage v-if="currentAuthPage === 'sign-in'" />
-		<SignUpPage v-else-if="currentAuthPage === 'sign-up'" />
+	<div v-else-if="!user" class="auth-container">
+		<SignIn v-if="currentAuthPage === 'sign-in'" />
+		<SignUp v-else-if="currentAuthPage === 'sign-up'" />
 	</div>
 
 	<ConvexProvider v-else>
@@ -60,7 +58,8 @@ watch(user, newUser => {
 </template>
 
 <style scoped>
-.loading-container {
+.loading-container,
+.auth-container {
 	display: flex;
 	align-items: center;
 	justify-content: center;
