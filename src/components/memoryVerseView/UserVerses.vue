@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area/index'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useConvexMutation, useConvexQuery } from '@convex-vue/core'
+import { useConvexMutation, useConvexQuery } from 'convex-vue'
 import { api } from '../../../convex/_generated/api'
 import { useAuth } from '@clerk/vue'
 import { BookOpen, Trash2 } from 'lucide-vue-next'

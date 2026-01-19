@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { SignUp } from '@clerk/vue'
+import { SignIn } from '@clerk/vue'
 </script>
 
 <template>
-	<SignUp />
+	<SignIn />
 </template>

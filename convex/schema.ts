@@ -2,6 +2,15 @@ import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
 
 export default defineSchema({
+	/** Stores authenticated user profiles synced from Clerk */
+	accounts: defineTable({
+		clerkId: v.string(),
+		email: v.string(),
+		name: v.optional(v.string()),
+		createdAt: v.number()
+	})
+		.index('by_clerk_id', ['clerkId'])
+		.index('by_email', ['email']),
 	/** Stores Bible verses that users have saved for memorization. Users
 	 * manually enter all verse information themselves */
 	userBibleEntries: defineTable({

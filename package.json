@@ -14,15 +14,14 @@
 		"format": "prettier --write src/"
 	},
 	"dependencies": {
-		"@clerk/clerk-js": "^5.57.2",
-		"@clerk/vue": "^1.4.2",
-		"@convex-vue/core": "^0.0.4",
+		"@clerk/vue": "^1.11.6",
 		"@internationalized/date": "^3.7.0",
 		"@vee-validate/zod": "^4.15.0",
 		"@vueuse/core": "^13.0.0",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
-		"convex": "^1.21.0",
+		"convex": "^1.26.2",
+		"convex-vue": "^0.1.5",
 		"embla-carousel-vue": "^8.5.2",
 		"lucide-vue-next": "^0.483.0",
 		"openai": "^4.91.0",
