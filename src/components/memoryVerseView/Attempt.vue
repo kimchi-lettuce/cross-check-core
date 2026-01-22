@@ -91,7 +91,7 @@ async function submitUserAttempt() {
 
 	submittedUserInput.value = userInput.value
 	const resp = await createAttempt({
-		userId: userId.value,
+		userId: userId.value as Id<'users'>,
 		bibleEntryId: props.verse?._id,
 		submittedText: userInput.value
 	})

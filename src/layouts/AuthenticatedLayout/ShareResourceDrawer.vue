@@ -8,7 +8,7 @@ import { ref } from 'vue'
 import { z } from 'zod'
 
 const resourceSchema = z.object({
-	type: z.enum(Object.keys([]) as [string, ...string[]], {
+	type: z.enum(['book', 'sermon', 'podcast', 'article'], {
 		required_error: 'Please select a resource type',
 		description: 'What kind of resource are you sharing?'
 	}),
@@ -16,43 +16,12 @@ const resourceSchema = z.object({
 	// Author is now optional since not all resources need it
 	author: z.string().min(1, 'Author is required').optional(),
 	url: z.string().url('Must be a valid URL').optional(),
-	// Add a description field for additional context
-	description: z.string().optional()
+	noteToReviewer: z.string().min(1, 'Note to reviewer is required')
 })
 
-const URL_REQUIRED_TYPES = [] as string[]
+const URL_REQUIRED_TYPES = ['sermon', 'podcast', 'article'] as string[]
 
-const AUTHOR_REQUIRED_TYPES = [] as string[]
-
-const isLoading = ref(false)
-
-const onSubmit = async (data: z.infer<typeof resourceSchema>) => {
-	try {
-		isLoading.value = true
-		console.log('🥬 data', data)
-		// 🚨 Warning: This will include fields that are optional despite not
-		// being required by that particular resource type.
-
-		// TODO: Implement resource sharing logic
-		// await db.resourceSubmissions.add($ => ({
-		// 	metadata: {
-		// 		type: 'Book',
-		// 		title: 'Sample Book Title',
-		// 		author: 'John Doe',
-		// 		url: 'https://example.com'
-		// 	},
-		// 	submission: {
-		// 		submittedBy: authStore.uid!,
-		// 		submittedAt: $.serverDate(),
-		// 		congregationId: '123' as Typesaurus.Id<'clubs'>
-		// 	},
-		// 	status: 'pending'
-		// }))
-		console.log('✅')
-	} finally {
-		isLoading.value = false
-	}
-}
+const AUTHOR_REQUIRED_TYPES = ['book', 'sermon', 'podcast', 'article'] as string[]
 </script>
 
 <template>
@@ -79,6 +48,12 @@ const onSubmit = async (data: z.infer<typeof resourceSchema>) => {
 				<div class="px-4">
 					<AutoForm
 						:schema="resourceSchema"
+						:field-config="{
+							noteToReviewer: {
+								label: 'Note to Resource Reviewer',
+								description: 'Briefly explain why you\'re recommending this resource and its value to the community.'
+							}
+						}"
 						:dependencies="[
 							{
 								sourceField: 'type',
@@ -108,7 +83,7 @@ const onSubmit = async (data: z.infer<typeof resourceSchema>) => {
 						@submit="onSubmit"
 						class="grid gap-4"
 					>
-						<div class="mt-auto flex flex-col gap-2 p-4 px-0">
+						<div class="mt-auto flex flex-col gap-2 py-10 px-0">
 							<span class="text-sm text-muted-foreground">
 								By submitting the resource, a staff of your congregation will review it and it will be published if it is appropriate
 							</span>

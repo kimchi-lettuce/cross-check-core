@@ -6,14 +6,14 @@ import { useConvexMutation, useConvexQuery } from '@convex-vue/core'
 import { api } from '../../../convex/_generated/api'
 import { useAuth } from '@clerk/vue'
 import { BookOpen, Trash2 } from 'lucide-vue-next'
-import type { Doc } from 'convex/_generated/dataModel'
+import type { Doc, Id } from 'convex/_generated/dataModel'
 
 const props = defineProps<{ selectedVerse?: Doc<'userBibleEntries'> | null }>()
 const emit = defineEmits<{ (e: 'select', verse: Doc<'userBibleEntries'> | null): void }>()
 
 const { userId } = useAuth()
 const { data: savedVerses, isLoading } = useConvexQuery(api.memoryVerse.entry.getSavedVerses, {
-	userId: userId.value ?? undefined
+	userId: userId.value as Id<'users'> | undefined
 })
 
 const { mutate: deleteVerseMutation, isLoading: isDeleting, error: deleteError } = useConvexMutation(api.memoryVerse.entry.deleteVerseEntry)

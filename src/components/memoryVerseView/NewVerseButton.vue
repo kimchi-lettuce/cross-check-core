@@ -11,6 +11,7 @@ import { watch } from 'vue'
 import { api } from '../../../convex/_generated/api'
 import { verseEntrySchema } from '../../../convex/memoryVerse/entry'
 import { useToast } from '../ui/toast'
+import type { Id } from 'convex/_generated/dataModel'
 
 const dialogVisibility = defineModel<boolean>('open', { required: false })
 const { userId } = useAuth()
@@ -34,7 +35,7 @@ const onSubmit = form.handleSubmit(async values => {
 	if (!userId.value) throw new Error('User not authenticated')
 	await addVerseEntry({
 		...values,
-		userId: userId.value
+		userId: userId.value as Id<'users'>
 	})
 	form.resetForm()
 	dialogVisibility.value = false

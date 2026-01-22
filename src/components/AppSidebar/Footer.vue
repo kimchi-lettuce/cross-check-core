@@ -2,15 +2,30 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { SidebarFooter, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
+import { useToast } from '@/components/ui/toast/use-toast'
 import { ChevronsUpDown, LogOut, Headset } from 'lucide-vue-next'
 import { ref } from 'vue'
 import AppMenuLink from './AppMenuLink.vue'
+import { useClerk } from '@clerk/vue'
 
 const data = ref({
 	user: {
 		avatar: 'https://github.com/shadcn.png'
 	}
 })
+
+const clerk = useClerk()
+const { toast } = useToast()
+
+function handleLogout() {
+	if (!clerk.value) {
+		return toast({
+			title: 'Error',
+			description: 'Unable to sign out. Please try again.'
+		})
+	}
+	return clerk.value.signOut()
+}
 </script>
 <template>
 	<SidebarFooter>
@@ -37,7 +52,7 @@ const data = ref({
 						</SidebarMenuButton>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent class="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg" side="bottom" align="end" :side-offset="4">
-						<DropdownMenuItem @click="console.warn('TODO: Log out')">
+						<DropdownMenuItem @click="handleLogout">
 							<LogOut />
 							Log out
 						</DropdownMenuItem>

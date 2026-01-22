@@ -36,6 +36,8 @@
 		"vue": "^3.5.13",
 		"vue-markdown-render": "^2.2.1",
 		"vue-router": "^4.5.0",
+		"youtube-transcript": "^1.2.1",
+		"youtube-transcript-api": "^2.0.4",
 		"zod": "^3.24.2"
 	},
 	"devDependencies": {

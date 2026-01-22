@@ -58,3 +58,17 @@ export const listenToAttempt = query({
 		return attempt
 	}
 })
+
+// If we weren't using convex, you would probably creat your own backend server
+// - I need to manage how many instances of my server are running
+// - deploy this server to multiple regions. Heroku, netlify handles this for me
+
+// Express node.js http server. using typscript
+// - Deploy it onto a service like Heroku, Netlify or something ...
+// - as the application gets more complex, does the one http server handle all form of requests.
+
+// - How would you handle authentication?
+// - 3rd party auth providers and make requests to them through your node.js server
+
+// Databases: spin up your own amazon AWS SQl database
+// - manage your own database connections
