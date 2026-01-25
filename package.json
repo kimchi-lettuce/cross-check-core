@@ -8,7 +8,6 @@
 		"convex:dev": "npx convex dev",
 		"build": "run-p type-check \"build-only {@}\" --",
 		"preview": "vite preview",
-		"test:unit": "vitest",
 		"build-only": "vite build",
 		"type-check": "vue-tsc --build",
 		"format": "prettier --write src/"

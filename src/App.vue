@@ -5,7 +5,9 @@ import { useUser, SignIn, SignUp } from '@clerk/vue'
 import { Loader2 } from 'lucide-vue-next'
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import ConvexProvider from './components/ConvexProvider.vue'
-import AuthenticatedLayout from '@/layouts/AuthenticatedLayout/index.vue'
+import AppSidebar from '@/components/AppSidebar/index.vue'
+import { SidebarProvider } from '@/components/ui/sidebar'
+import Inset from '@/layouts/AuthenticatedLayout/Inset.vue'
 
 const { user, isLoaded } = useUser()
 const currentAuthPage = ref<'sign-in' | 'sign-up'>('sign-in')
@@ -51,9 +53,14 @@ watch(user, newUser => {
 	</div>
 
 	<ConvexProvider v-else>
-		<AuthenticatedLayout>
-			<RouterView />
-		</AuthenticatedLayout>
+		<SidebarProvider>
+			<div class="flex h-screen w-screen">
+				<AppSidebar />
+				<Inset>
+					<RouterView />
+				</Inset>
+			</div>
+		</SidebarProvider>
 	</ConvexProvider>
 </template>
 
